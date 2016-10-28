@@ -106,13 +106,12 @@ class Ship
 
     # x -= 0 if $max = 0.00
     # x += 1 if @keys.include?( :right )
-    x += 1 if $max > 0.00
-    y -= 1 if $value >= 50 # up is down in screen coordinates
-    if @py < 600
-      y += 1.5 * ((600 - @py)/500)
-    # elsif @py > 600
-    #   y = 0
+    if $value > 40
+      x += 0.1 * $value/100
     end
+    y -= 10 if $max > 0 # up is down in screen coordinates
+    y += 0.5 if @py < 300
+    y -= 0.1 if @py > 300
 
     # Scale to the acceleration rate. This is a bit unrealistic, since
     # it doesn't consider magnitude of x and y combined (diagonal).
@@ -166,9 +165,9 @@ class Ship
   # Update the position based on the velocity and the time since last
   # update.
   def update_pos( dt )
-    if(@px >= 600 || @py > 600 || @px <= 0 || @py <= 0)
-      @px = 300
-      @py = 600
+    if(@px >= 600 || @py > 600 || @px < 0 || @py <= 0)
+      @px = 0
+      @py = 300
     else
       @px += @vx * dt
       @py += @vy * dt
@@ -256,7 +255,7 @@ class Game
 
   # Create the player ship in the middle of the screen
   def make_ship
-    @ship = Ship.new( @screen.w/2, @screen.h )
+    @ship = Ship.new( 0, @screen.h/2 )
 
     # Make event hook to pass all events to @ship#handle().
     make_magic_hooks_for( @ship, { YesTrigger.new() => :handle } )
@@ -316,6 +315,7 @@ threads << Thread.new {
     x = j.to_f
     if x > $max
       $max = x
+      puts $max
     end
   end
   emg.close
